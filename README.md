@@ -1,7 +1,7 @@
 # octopus-tools
 
-Static browser utilities — speed reader, hash generator, base converter, subnet
-calculator and password generator.
+Static browser utilities — speed reader, typing trainer, hash generator, base converter, subnet
+calculator, network planner (VLSM, supernetting, IPv6), tech calculators and password generator.
 
 Plain HTML and JS in `public/`, served by nginx. No backend, no accounts, no
 build step, and no data leaves the browser.

@@ -131,7 +131,7 @@ test('no script in public/scripts imports a sibling — the stamper cannot versi
 test('the shared modules load in Node as well as the browser, so they can be tested', () => {
   // A module the tests cannot require is a module with no tests. Both of these
   // assign module.exports under Node and a global in a browser.
-  for (const f of ['bases.js', 'ipv4.js']) {
+  for (const f of ['bases.js', 'ipv4.js', 'ipv6.js', 'techcalc.js', 'typing.js']) {
     const src = fs.readFileSync(path.join(pub, 'scripts', f), 'utf8');
     assert.match(src, /module\.exports/, `${f} cannot be required by a test`);
     assert.match(src, /global\.\w+ = API/, `${f} exposes nothing to the page`);

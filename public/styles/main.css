@@ -12,6 +12,31 @@
   --accent-hover: #e05a3c;
   --radius: 8px;
   --header-height: 60px;
+  --good: #6fcf8e;
+  --warn: #e5c07b;
+  --bad: #ff7a63;
+  --header-bg: rgba(13, 13, 13, 0.85);
+  color-scheme: dark light;
+}
+
+/* Light theme. Follows the visitor's system setting; the pages have no toggle.
+   Colours that used to be written as literals in a page's own <style> still
+   read as dark-theme values, so new pages take --good/--warn/--bad instead. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f5f1;
+    --bg-2: #ffffff;
+    --bg-3: #eeece6;
+    --border: #d6d2c8;
+    --text: #1c1c1c;
+    --text-muted: #5b5b5b;
+    --accent: #b23c24;
+    --accent-hover: #c84b31;
+    --good: #1f7a3d;
+    --warn: #8a5a00;
+    --bad: #b3261e;
+    --header-bg: rgba(246, 245, 241, 0.88);
+  }
 }
 
 /* ===========================
@@ -25,6 +50,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg);        /* overscroll paints html, not body */
 }
 
 body {
@@ -34,6 +60,10 @@ body {
   font-size: 16px;
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-wrap: break-word;
+  hyphens: manual;
   display: flex;
   flex-direction: column;
 }
@@ -55,7 +85,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(13, 13, 13, 0.85);
+  background-color: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -148,6 +178,14 @@ a:hover {
   }
 }
 
+/* Page wrappers that centre themselves with margin:auto inside the column-flex
+   body do not stretch; they shrink to their widest unbreakable content (a
+   nowrap table, a pre) and push the page sideways. Give them the full width and
+   let their contents scroll inside them. */
+.tool-section, .tools-grid { width: 100%; }
+.tool-section .panel { min-width: 0; }
+.tool-card { min-width: 0; }
+
 /* ===========================
    Hero
    =========================== */
@@ -184,7 +222,8 @@ a:hover {
 
 @media (max-width: 900px) {
   .content-section {
-    margin: 0 12px 20px;
+    width: auto;                 /* 100% plus a 12px margin each side overflowed by 24px */
+    margin: 0 16px 20px;
     padding: 20px 18px;
   }
 }

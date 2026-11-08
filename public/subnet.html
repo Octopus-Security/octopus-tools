@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Octopus Tools — Subnet Calculator</title>
-  <link rel="stylesheet" href="/styles/main.css?v=fd726324" />
+  <link rel="stylesheet" href="/styles/main.css?v=aede35c6" />
   <link rel="icon" type="image/svg+xml" href="https://auth.octopustechnology.net/brand/tools/favicon.svg">
   <link rel="apple-touch-icon" href="https://auth.octopustechnology.net/brand/tools/apple-touch-icon.png">
   <link rel="manifest" href="https://auth.octopustechnology.net/brand/tools/site.webmanifest" crossorigin="anonymous">
@@ -22,7 +22,7 @@
 
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .row + .row { margin-top: 12px; }
-    .field-label { color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; }
+    .field-label { color: var(--text-muted); font-size: 0.85rem; min-width: 0; }
 
     .cidr-input {
       flex: 1 1 260px; min-width: 0;
@@ -54,11 +54,11 @@
 
     /* Facts */
     .facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-    .fact { background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; }
+    .fact { background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; min-width: 0; }
     .fact .k { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
     .fact .v {
       font-family: ui-monospace, 'Courier New', monospace; font-size: 1rem; margin-top: 4px;
-      word-break: break-all; font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere; overflow-x: auto; font-variant-numeric: tabular-nums;
     }
     .fact.wide { grid-column: 1 / -1; }
     .fact .v.muted { color: var(--text-muted); font-size: 0.88rem; }
@@ -122,9 +122,12 @@
       <nav>
         <a href="/" class="nav-link">Home</a>
         <a href="/speed-reader.html" class="nav-link">Speed Reader</a>
+        <a href="/typing.html" class="nav-link">Typing</a>
         <a href="/hash.html" class="nav-link">Hash</a>
         <a href="/baseconv.html" class="nav-link">Base Conv</a>
         <a href="/subnet.html" class="nav-link active">Subnet</a>
+        <a href="/netcalc.html" class="nav-link">Network</a>
+        <a href="/techcalc.html" class="nav-link">Calc</a>
         <a href="/password-generator.html" class="nav-link">Password</a>
       </nav>
     </div>
@@ -248,7 +251,7 @@ host range = network+1  …  broadcast−1</div>
     <a href="https://octopustechnology.net" target="_blank" rel="noopener">Octopus Technology</a>
   </footer>
 
-  <script src="/scripts/ipv4.js?v=2277c7d1"></script>
+  <script src="/scripts/ipv4.js?v=bc3c09e7"></script>
   <script>
   (function () {
     'use strict';
