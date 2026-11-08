@@ -83,6 +83,7 @@ function matches(el, selector) {
 }
 
 function defaultValue(el) {
+  if (el.tag === 'textarea') return text(el);
   if (el.tag === 'select') {
     const opts = descendants(el).filter(d => d.tag === 'option');
     const sel  = opts.find(o => 'selected' in o.attrs) || opts[0];
@@ -192,14 +193,52 @@ test('subnet.html loads its module, runs, and shows the block', () => {
   assert.match(d.getElementById('hostsResult').textContent, /\/23/);
 });
 
+test('netcalc.html runs and shows an answer in every panel', () => {
+  const s = boot('netcalc.html');
+  assert.ok(s.IPv4 && s.IPv6, 'a module did not attach to the page');
+  const d = s.document;
+  for (const id of ['splitError', 'vlsmError', 'sumError', 'v6Error', 'p6Error'])
+    assert.equal(d.getElementById(id).textContent, '', `${id} shows an error on a page that ships with valid defaults`);
+  assert.match(d.getElementById('splitTable').innerHTML, /10\.0\.32\.0\/19/);
+  assert.match(d.getElementById('vlsmTable').innerHTML, /192\.168\.10\.128\/26/);
+  assert.match(d.getElementById('sumFacts').innerHTML, /192\.168\.0\.0\/22/);
+  assert.match(d.getElementById('v6Facts').innerHTML, /2001:db8::1:0:0:1/);
+  assert.match(d.getElementById('p6Facts').innerHTML, /65,536/);
+});
+
+test('techcalc.html runs and shows an answer in every panel', () => {
+  const s = boot('techcalc.html');
+  assert.ok(s.TechCalc, 'techcalc.js did not attach to the page');
+  const d = s.document;
+  for (const id of ['bwError', 'dsError', 'tsError', 'dtError', 'cmError'])
+    assert.equal(d.getElementById(id).textContent, '', `${id} shows an error on a page that ships with valid defaults`);
+  assert.match(d.getElementById('bwWork').textContent, /0000 0110/);               // 0xB6 AND 0x0F
+  assert.match(d.getElementById('dsFacts').innerHTML, /Transfer time/);
+  assert.match(d.getElementById('tsFacts').innerHTML, /2026-11-08 14:30:00 EST/);
+  assert.match(d.getElementById('dtFacts').innerHTML, /1794166200/);
+  assert.match(d.getElementById('cmFacts').innerHTML, /rwxr-xr-x/);
+  assert.equal(d.getElementById('cmCommand').textContent, 'chmod 755 file');
+});
+
+test('typing.html runs, prepares a test, and survives having no localStorage', () => {
+  const s = boot('typing.html');           // the sandbox has no localStorage at all
+  assert.ok(s.Typing, 'typing.js did not attach to the page');
+  const d = s.document;
+  assert.equal(d.getElementById('runTitle').textContent, '30 second test');
+  assert.ok(d.getElementById('typeBox').children.length >= 100, 'no text was laid out to type');
+  assert.equal(d.getElementById('hudTime').textContent, '30');
+  assert.ok(d.getElementById('lessonList').innerHTML.includes('Home row'), 'the lessons were not listed');
+  assert.match(d.getElementById('bestTable').innerHTML, /No results yet/);
+});
+
 test('each page loads the script it uses, and uses the script it loads', () => {
   // A page that reaches for Bases without loading bases.js is a blank page in a
   // browser and a passing test everywhere else.
-  for (const page of ['baseconv.html', 'subnet.html']) {
+  for (const page of ['baseconv.html', 'subnet.html', 'netcalc.html', 'techcalc.html', 'typing.html']) {
     const html   = fs.readFileSync(path.join(pub, page), 'utf8');
     const loaded = [...html.matchAll(/<script src="\/scripts\/([\w.-]+)\.js/g)].map(m => m[1]);
     const body   = html.replace(/<script src[^>]*><\/script>/g, '');
-    for (const [file, name] of Object.entries({ bases: 'Bases', ipv4: 'IPv4' })) {
+    for (const [file, name] of Object.entries({ bases: 'Bases', ipv4: 'IPv4', ipv6: 'IPv6', techcalc: 'TechCalc', typing: 'Typing' })) {
       const used = new RegExp(`\\b${name}\\.`).test(body);
       assert.equal(used, loaded.includes(file),
         `${page}: ${name} is ${used ? 'used' : 'unused'} but ${file}.js is ${loaded.includes(file) ? '' : 'not '}loaded`);

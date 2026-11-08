@@ -251,8 +251,128 @@
              usable: Math.pow(2, bits) - 2, spare: Math.pow(2, bits) - 2 - n };
   }
 
+  /** "Give me N subnets": rounds N up to a power of two, because bits are borrowed whole. */
+  function splitInto(input, n) {
+    const base = subnet(input); if (!base.ok) return base;
+    const want = Number(n);
+    if (!Number.isInteger(want) || want < 1) return { ok: false, error: 'Enter a whole number of subnets, 1 or more.' };
+    let bits = 0; while (Math.pow(2, bits) < want) bits++;
+    if (base.prefix + bits > 32)
+      return { ok: false, error: `${base.cidr} has only ${32 - base.prefix} host bits, so it cannot be cut into ${want} blocks ` +
+                                 `(that needs ${bits} borrowed bits).` };
+    const r = subdivide(base.cidr, base.prefix + bits, 1024);
+    if (!r.ok) return r;
+    r.wanted = want; r.spare = r.count - want; r.bits = bits;
+    return r;
+  }
+
+  const ctz = n => (n === 0 ? 32 : 31 - Math.clz32((n & -n) >>> 0));
+
+  /**
+   * VLSM: biggest requirement first, each block aligned to its own size. Largest
+   * first is what keeps alignment from wasting space; smallest-first strands gaps.
+   * `requests` is [{name, hosts}] or plain numbers.
+   */
+  function vlsm(input, requests) {
+    const base = subnet(input); if (!base.ok) return base;
+    if (!Array.isArray(requests) || !requests.length) return { ok: false, error: 'List at least one host count.' };
+    const reqs = [];
+    for (let i = 0; i < requests.length; i++) {
+      const q = typeof requests[i] === 'object' ? requests[i] : { hosts: requests[i] };
+      const need = prefixForHosts(q.hosts);
+      if (!need.ok) return { ok: false, error: `Request ${i + 1}: ${need.error}` };
+      reqs.push({ index: i, name: q.name || `Subnet ${i + 1}`, hosts: need.hosts, prefix: need.prefix });
+    }
+    const order = reqs.slice().sort((a, b) => b.hosts - a.hosts || a.index - b.index);
+    const end = base.networkValue + base.total - 1;
+    let cursor = base.networkValue, used = 0;
+    const allocations = [];
+    for (const q of order) {
+      const size = Math.pow(2, 32 - q.prefix);
+      cursor = Math.ceil(cursor / size) * size;            // align up to the block's own size
+      if (cursor + size - 1 > end)
+        return { ok: false, error: `Out of space in ${base.cidr}: "${q.name}" needs a /${q.prefix} (${size} addresses) ` +
+                                   `for ${q.hosts} hosts and nothing aligned is left.` };
+      const s = subnet(formatIp(cursor), q.prefix);
+      allocations.push({ name: q.name, index: q.index, hosts: q.hosts, prefix: q.prefix, cidr: s.cidr, mask: s.mask,
+                         firstHost: s.firstHost, lastHost: s.lastHost, broadcast: s.broadcast,
+                         usable: s.usable, spare: s.usable - q.hosts });
+      cursor += size; used += size;
+    }
+    return { ok: true, from: base.cidr, allocations, used, free: base.total - used, total: base.total,
+             nextFree: cursor <= end ? formatIp(cursor) : null };
+  }
+
+  /** One CIDR or a bare address (a /32). Non-aligned input is normalised and says so. */
+  function parseNet(text) {
+    const s = String(text == null ? '' : text).trim();
+    if (!s) return { ok: false, error: 'empty line' };
+    const sp = s.includes('/') || /\s/.test(s) ? splitCidr(s) : { ok: true, addr: s, prefix: 32 };
+    if (!sp.ok) return sp;
+    const ip = parseIp(sp.addr); if (!ip.ok) return ip;
+    const network = U32(ip.value & prefixToMask(sp.prefix));
+    return { ok: true, network, prefix: sp.prefix, size: Math.pow(2, 32 - sp.prefix),
+             cidr: `${formatIp(network)}/${sp.prefix}`, normalised: network !== ip.value, given: s };
+  }
+
+  /** Union of intervals decomposed into the fewest aligned CIDR blocks. */
+  function intervalsToCidrs(intervals) {
+    const out = [];
+    for (const [a, b] of intervals) {
+      let start = a;
+      while (start <= b) {
+        let bits = ctz(start >>> 0);
+        if (start === 0) bits = 32;
+        while (bits > 0 && start + Math.pow(2, bits) - 1 > b) bits--;
+        out.push(`${formatIp(start)}/${32 - bits}`);
+        start += Math.pow(2, bits);
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Route summarisation. `summary` is the SINGLE smallest block covering every
+   * input; `exact` says whether it covers nothing else. `minimal` is the fewest
+   * blocks covering the inputs exactly, for when one summary would over-advertise.
+   */
+  function summarize(list) {
+    const lines = Array.isArray(list) ? list : String(list == null ? '' : list).split(/[\n,;]+/);
+    const nets = [], notes = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (!String(lines[i]).trim()) continue;
+      const n = parseNet(lines[i]);
+      if (!n.ok) return { ok: false, error: `"${String(lines[i]).trim()}": ${n.error}` };
+      if (n.normalised) notes.push(`${n.given} has host bits set; treated as its network ${n.cidr}.`);
+      nets.push(n);
+    }
+    if (!nets.length) return { ok: false, error: 'Enter at least one network.' };
+
+    const sorted = nets.slice().sort((a, b) => a.network - b.network || a.prefix - b.prefix);
+    const merged = [];
+    const redundant = [];
+    for (const n of sorted) {
+      const a = n.network, b = n.network + n.size - 1;
+      const last = merged[merged.length - 1];
+      if (last && a <= last[1] + 1) {
+        if (b <= last[1]) redundant.push(n.cidr);
+        last[1] = Math.max(last[1], b);
+      } else merged.push([a, b]);
+    }
+    const covered = merged.reduce((t, [a, b]) => t + (b - a + 1), 0);
+    const lo = merged[0][0], hi = merged[merged.length - 1][1];
+    const x = (lo ^ hi) >>> 0;
+    const prefix = x === 0 ? 32 : Math.clz32(x);
+    const network = U32(lo & prefixToMask(prefix));
+    const total = Math.pow(2, 32 - prefix);
+    return { ok: true, count: nets.length, summary: `${formatIp(network)}/${prefix}`, prefix,
+             mask: formatIp(prefixToMask(prefix)), total, covered, extra: total - covered,
+             exact: total === covered, minimal: intervalsToCidrs(merged), redundant, notes };
+  }
+
   const API = { parseIp, formatIp, octetsOf, bin8, dotBin, prefixToMask, maskToPrefix,
-                classOf, specialOf, markPrefix, splitCidr, subnet, subdivide, prefixForHosts };
+                classOf, specialOf, markPrefix, splitCidr, subnet, subdivide, prefixForHosts,
+                splitInto, vlsm, parseNet, summarize, intervalsToCidrs };
 
   if (typeof module === 'object' && module.exports) module.exports = API;
   global.IPv4 = API;

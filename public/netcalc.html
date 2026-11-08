@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Octopus Tools — Network Planner</title>
+  <link rel="stylesheet" href="/styles/main.css?v=aede35c6" />
+  <link rel="stylesheet" href="/styles/tool.css?v=1f8d696a" />
+  <link rel="icon" type="image/svg+xml" href="https://auth.octopustechnology.net/brand/tools/favicon.svg">
+  <link rel="apple-touch-icon" href="https://auth.octopustechnology.net/brand/tools/apple-touch-icon.png">
+  <link rel="manifest" href="https://auth.octopustechnology.net/brand/tools/site.webmanifest" crossorigin="anonymous">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">🐙 Octopus Tools</a>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/speed-reader.html" class="nav-link">Speed Reader</a>
+        <a href="/typing.html" class="nav-link">Typing</a>
+        <a href="/hash.html" class="nav-link">Hash</a>
+        <a href="/baseconv.html" class="nav-link">Base Conv</a>
+        <a href="/subnet.html" class="nav-link">Subnet</a>
+        <a href="/netcalc.html" class="nav-link active">Network</a>
+        <a href="/techcalc.html" class="nav-link">Calc</a>
+        <a href="/password-generator.html" class="nav-link">Password</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Network Planner</h1>
+    <p class="tagline">Split, size, summarise &mdash; IPv4 and IPv6.</p>
+  </section>
+
+  <section class="tool-section">
+
+    <div class="panel">
+      <h2>Split into N equal subnets</h2>
+      <div class="row">
+        <input class="t-input" id="splitNet" type="text" value="10.0.0.0/16" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Network to split" />
+        <span class="field-label">into</span>
+        <input class="t-input short" id="splitN" type="number" inputmode="numeric" min="1" value="6" aria-label="Number of subnets" />
+        <span class="field-label">subnets</span>
+      </div>
+      <p class="error-msg" id="splitError"></p>
+      <p class="lead" id="splitSummary" style="margin-top:12px"></p>
+      <div class="table-wrap tall"><table class="data" id="splitTable"></table></div>
+    </div>
+
+    <div class="panel">
+      <h2>VLSM &mdash; subnets sized for host counts</h2>
+      <p class="lead">One requirement per line, as <code>name hosts</code> or just a number. Largest are placed first and each block is aligned to its own size.</p>
+      <div class="row">
+        <input class="t-input" id="vlsmNet" type="text" value="192.168.10.0/24" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Parent network" />
+      </div>
+      <div class="row">
+        <textarea class="t-area" id="vlsmList" spellcheck="false" aria-label="Host requirements">Sales 100
+Engineering 50
+Guests 25
+Link-A 2
+Link-B 2</textarea>
+      </div>
+      <p class="error-msg" id="vlsmError"></p>
+      <p class="lead" id="vlsmSummary" style="margin-top:12px"></p>
+      <div class="table-wrap"><table class="data" id="vlsmTable"></table></div>
+    </div>
+
+    <div class="panel">
+      <h2>Summarise routes (supernet)</h2>
+      <p class="lead">One network per line. Overlaps, duplicates and unsorted input are fine; an address with host bits set is read as its network.</p>
+      <div class="row">
+        <textarea class="t-area" id="sumList" spellcheck="false" aria-label="Networks to summarise">192.168.0.0/24
+192.168.1.0/24
+192.168.2.0/24
+192.168.3.0/24</textarea>
+      </div>
+      <p class="error-msg" id="sumError"></p>
+      <div id="sumFlags" style="margin-top:12px"></div>
+      <div class="facts" id="sumFacts"></div>
+      <div id="sumExtra"></div>
+    </div>
+
+    <div class="panel">
+      <h2>IPv6 &mdash; expand and compress</h2>
+      <div class="row">
+        <input class="t-input" id="v6Addr" type="text" value="2001:db8:0:0:1:0:0:1" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="IPv6 address" />
+      </div>
+      <p class="error-msg" id="v6Error"></p>
+      <div class="facts" id="v6Facts" style="margin-top:12px"></div>
+    </div>
+
+    <div class="panel">
+      <h2>IPv6 &mdash; prefix range and /64 count</h2>
+      <div class="row">
+        <input class="t-input" id="p6Input" type="text" value="2001:db8:abcd::/48" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="IPv6 prefix" />
+      </div>
+      <p class="error-msg" id="p6Error"></p>
+      <div id="p6Flags" style="margin-top:12px"></div>
+      <div class="facts" id="p6Facts"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Reference</h2>
+      <details>
+        <summary>How summarisation finds the block</summary>
+        <div class="ref-body">
+          <p>Take the lowest network address and the highest broadcast address. The summary is the longest prefix they have in common; every bit after that differs somewhere in the range.</p>
+          <p><strong>Exact</strong> means the summary holds exactly the inputs and nothing else. If it is not exact, advertising it attracts traffic for the extra space &mdash; use the minimal list instead, which is the fewest blocks that cover the inputs and nothing more.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Why VLSM sorts largest first</summary>
+        <div class="ref-body">
+          <p>A block must start on a multiple of its own size. Place a small one first and the next big one has to skip ahead to the next boundary, stranding the space between. Largest first keeps every later block aligned for free.</p>
+        </div>
+      </details>
+      <details>
+        <summary>IPv6 prefixes in a sentence</summary>
+        <div class="ref-body">
+          <p>A <code>/64</code> is one LAN. An ISP typically hands a site a <code>/48</code> (65,536 LANs) or <code>/56</code> (256). The first 64 bits route; the last 64 are the host. The mask table for IPv4 is on the <a href="/subnet.html">subnet page</a>.</p>
+        </div>
+      </details>
+    </div>
+
+  </section>
+
+  <footer class="site-footer">
+    <a href="https://octopustechnology.net" target="_blank" rel="noopener">Octopus Technology</a>
+  </footer>
+
+  <script src="/scripts/ipv4.js?v=bc3c09e7"></script>
+  <script src="/scripts/ipv6.js?v=a0d3da14"></script>
+  <script>
+  (function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const commas = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const fact = (k, v, wide) => `<div class="fact${wide ? ' wide' : ''}"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`;
+    const flag = (t, cls) => `<div class="flag ${cls || ''}">${esc(t)}</div>`;
+    const table = (head, rows) =>
+      '<thead><tr>' + head.map(h => `<th>${esc(h)}</th>`).join('') + '</tr></thead><tbody>' +
+      rows.map(r => '<tr>' + r.map(c => `<td>${esc(c)}</td>`).join('') + '</tr>').join('') + '</tbody>';
+
+    function renderSplit() {
+      const r = IPv4.splitInto($('splitNet').value, Number($('splitN').value));
+      if (!r.ok) { $('splitError').textContent = r.error; $('splitSummary').textContent = ''; $('splitTable').innerHTML = ''; return; }
+      $('splitError').textContent = '';
+      $('splitSummary').textContent =
+        `${r.from} as ${commas(r.count)} x /${r.newPrefix} (${r.bits} bit${r.bits === 1 ? '' : 's'} borrowed, ` +
+        `${commas(r.usableEach)} usable each).` +
+        (r.spare ? ` You asked for ${commas(r.wanted)}; bits come whole, so ${commas(r.spare)} extra block${r.spare === 1 ? '' : 's'} are left over.` : '') +
+        (r.truncated ? ` First ${r.shown} shown.` : '');
+      $('splitTable').innerHTML = table(['#', 'Network', 'First host', 'Last host', 'Broadcast'],
+        r.subnets.map(s => [s.index, s.cidr, s.firstHost, s.lastHost, s.broadcast || '-']));
+    }
+
+    function parseRequests(text) {
+      const reqs = [];
+      for (const line of String(text).split('\n')) {
+        const t = line.trim(); if (!t) continue;
+        const m = /^(?:(.*?)[\s:=,]+)?(\d+)$/.exec(t);
+        if (!m) return { error: `"${t}": write it as "name hosts" or just a number.` };
+        reqs.push({ name: m[1] || undefined, hosts: Number(m[2]) });
+      }
+      return { reqs };
+    }
+    function renderVlsm() {
+      const p = parseRequests($('vlsmList').value);
+      const fail = msg => { $('vlsmError').textContent = msg; $('vlsmSummary').textContent = ''; $('vlsmTable').innerHTML = ''; };
+      if (p.error) return fail(p.error);
+      const r = IPv4.vlsm($('vlsmNet').value, p.reqs);
+      if (!r.ok) return fail(r.error);
+      $('vlsmError').textContent = '';
+      $('vlsmSummary').textContent = `${commas(r.used)} of ${commas(r.total)} addresses allocated in ${r.from}; ` +
+        `${commas(r.free)} free` + (r.nextFree ? `, next free address ${r.nextFree}.` : '.');
+      $('vlsmTable').innerHTML = table(['Name', 'Need', 'Block', 'Mask', 'First host', 'Last host', 'Broadcast', 'Spare'],
+        r.allocations.map(a => [a.name, a.hosts, a.cidr, a.mask, a.firstHost, a.lastHost, a.broadcast || '-', a.spare]));
+    }
+
+    function renderSummary() {
+      const r = IPv4.summarize($('sumList').value);
+      if (!r.ok) {
+        $('sumError').textContent = r.error; $('sumFacts').innerHTML = ''; $('sumFlags').innerHTML = ''; $('sumExtra').innerHTML = '';
+        return;
+      }
+      $('sumError').textContent = '';
+      $('sumFlags').innerHTML = flag(r.exact
+        ? 'Exact: the summary covers these networks and nothing else.'
+        : `Not exact: the summary also covers ${commas(r.extra)} address${r.extra === 1 ? '' : 'es'} that are not in your list. ` +
+          'Advertising it would claim space you do not have.', r.exact ? 'good' : '') +
+        r.notes.map(n => flag(n)).join('') +
+        (r.redundant.length ? flag('Already covered by another entry: ' + r.redundant.join(', ')) : '');
+      $('sumFacts').innerHTML = [
+        fact('Summary', r.summary), fact('Mask', r.mask),
+        fact('Addresses in summary', commas(r.total)), fact('Addresses in your list', commas(r.covered)),
+        fact('Extra space covered', commas(r.extra)),
+        fact('Minimal exact list', r.minimal.join('\n'), true)
+      ].join('');
+      const v = $('sumFacts').querySelector('.fact.wide .v'); if (v) v.style.whiteSpace = 'pre-line';
+    }
+
+    function renderV6() {
+      const r = IPv6.parse($('v6Addr').value);
+      if (!r.ok) { $('v6Error').textContent = r.error; $('v6Facts').innerHTML = ''; return; }
+      $('v6Error').textContent = '';
+      $('v6Facts').innerHTML = [
+        fact('Compressed', IPv6.compress(r.value), true), fact('Expanded', IPv6.expand(r.value), true),
+        fact('Type', IPv6.kindOf(r.value), true)
+      ].join('');
+    }
+
+    function renderP6() {
+      const r = IPv6.prefix($('p6Input').value);
+      if (!r.ok) { $('p6Error').textContent = r.error; $('p6Facts').innerHTML = ''; $('p6Flags').innerHTML = ''; return; }
+      $('p6Error').textContent = '';
+      $('p6Flags').innerHTML = r.nonAligned ? flag('The address has bits set past the prefix; the network below is the address with those cleared.') : '';
+      $('p6Facts').innerHTML = [
+        fact('Network', `${r.networkText}/${r.len}`, true),
+        fact('Last address', r.lastText, true),
+        fact('First, expanded', r.expandedNetwork, true), fact('Last, expanded', r.expandedLast, true),
+        fact('Addresses', commas(r.total.toString()), true),
+        fact('/64 subnets', r.insideOne64 ? 'none - this is inside a single /64' : commas(r.slash64.toString())),
+        fact('/56 subnets', r.slash56 ? commas(r.slash56.toString()) : 'none'),
+        fact('/48 subnets', r.slash48 ? commas(r.slash48.toString()) : 'none'),
+        fact('Type', r.kind)
+      ].join('');
+    }
+
+    [['splitNet', renderSplit], ['splitN', renderSplit], ['vlsmNet', renderVlsm], ['vlsmList', renderVlsm],
+     ['sumList', renderSummary], ['v6Addr', renderV6], ['p6Input', renderP6]]
+      .forEach(([id, fn]) => $(id).addEventListener('input', fn));
+
+    renderSplit(); renderVlsm(); renderSummary(); renderV6(); renderP6();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+/* ===========================
+   Shared layout for the calculator and trainer pages
+   (netcalc, techcalc, typing). The older pages keep their own inline
+   styles; this exists so three new pages do not each carry a copy.
+   Colours are the tokens in main.css, so light and dark both work.
+   =========================== */
+.tool-section { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; width: 100%; }
+
+.panel {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px 20px; margin-bottom: 20px;
+  min-width: 0;
+}
+.panel > h2 {
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--text-muted); font-weight: 600; margin-bottom: 14px;
+}
+.panel p.lead { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; margin-bottom: 12px; }
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row + .row { margin-top: 12px; }
+.field-label { color: var(--text-muted); font-size: 0.85rem; }
+
+.t-input, .t-area, .t-select {
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
+  border-radius: var(--radius); padding: 11px 12px; min-height: 44px;
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 16px; min-width: 0; max-width: 100%;
+}
+.t-select { font-family: inherit; }
+.t-input { flex: 1 1 200px; }
+.t-input.short { flex: 0 1 120px; }
+.t-area { width: 100%; min-height: 120px; resize: vertical; line-height: 1.5; }
+.t-input:focus, .t-area:focus, .t-select:focus { outline: none; border-color: var(--accent); }
+.t-input.error, .t-area.error { border-color: var(--bad); }
+
+.t-btn {
+  min-height: 44px; padding: 8px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--text);
+  font: inherit; font-size: 16px; cursor: pointer;
+}
+.t-btn:hover { border-color: var(--accent); }
+.t-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.t-btn.primary:hover { background: var(--accent-hover); }
+.t-btn.on { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+
+.error-msg { color: var(--bad); font-size: 0.86rem; margin: 12px 0 0; line-height: 1.5; }
+.error-msg:empty { display: none; }
+.hidden { display: none !important; }
+.muted { color: var(--text-muted); }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 10px; }
+.fact { background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; min-width: 0; }
+.fact .k { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.fact .v {
+  font-family: ui-monospace, 'Courier New', monospace; font-size: 1rem; margin-top: 4px;
+  overflow-wrap: anywhere; font-variant-numeric: tabular-nums;
+}
+.fact.wide { grid-column: 1 / -1; }
+
+.flag {
+  border-left: 3px solid var(--warn); background: var(--bg-3);
+  padding: 9px 13px; border-radius: 0 6px 6px 0; font-size: 0.86rem;
+  color: var(--warn); margin-bottom: 12px; line-height: 1.55;
+}
+.flag.good { border-left-color: var(--good); color: var(--good); }
+
+pre.work, .formula {
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 0.82rem; line-height: 1.7; background: var(--bg-3);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 11px 13px; overflow-x: auto; white-space: pre; margin: 8px 0 0; max-width: 100%;
+}
+
+.table-wrap { overflow-x: auto; max-width: 100%; }
+.table-wrap.tall { max-height: 380px; overflow-y: auto; }
+table.data { width: 100%; border-collapse: collapse; font-size: 0.83rem;
+  font-family: ui-monospace, 'Courier New', monospace; font-variant-numeric: tabular-nums; }
+table.data th {
+  text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); font-weight: 600; padding: 0 12px 7px 0;
+  font-family: system-ui, sans-serif; white-space: nowrap;
+}
+table.data td { padding: 5px 12px 5px 0; border-top: 1px solid var(--border); white-space: nowrap; }
+
+.tabbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+
+details { border-top: 1px solid var(--border); }
+details summary {
+  cursor: pointer; padding: 14px 0; font-size: 0.92rem; font-weight: 600;
+  list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '▸'; color: var(--accent); }
+details[open] summary::before { content: '▾'; }
+.ref-body { padding-bottom: 16px; }
+.ref-body p { color: var(--text-muted); font-size: 0.87rem; line-height: 1.65; margin: 10px 0; }
+.ref-body strong { color: var(--text); }
+
+code { font-family: ui-monospace, 'Courier New', monospace; font-size: 0.9em;
+  background: var(--bg-3); padding: 1px 5px; border-radius: 4px;
+  overflow-wrap: anywhere; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+/* ── Typing ── */
+.type-note { border-left: 3px solid var(--accent); background: var(--bg-3); padding: 10px 13px;
+  border-radius: 0 6px 6px 0; font-size: 0.88rem; margin-bottom: 14px; line-height: 1.55; }
+.type-hud { display: flex; gap: 18px; flex-wrap: wrap; font-variant-numeric: tabular-nums;
+  font-size: 1.1rem; margin-bottom: 12px; }
+.type-hud b { color: var(--accent); font-weight: 700; }
+.type-box {
+  position: relative; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 1.15rem; line-height: 1.9; max-height: 260px; overflow-y: auto; cursor: text;
+  white-space: pre-wrap; overflow-wrap: anywhere; outline: none; min-height: 120px;
+}
+.type-box:focus { border-color: var(--accent); }
+.type-box .ok { color: var(--good); }
+.type-box .bad { color: var(--bad); background: rgba(255, 122, 99, 0.18); text-decoration: underline; }
+.type-box .cur { box-shadow: -2px 0 0 var(--accent); animation: blink 1s steps(1) infinite; }
+.type-box .todo { color: var(--text-muted); }
+.type-box.code { white-space: pre; overflow-wrap: normal; overflow-x: auto; font-size: 1rem; line-height: 1.7; }
+.type-box.idle .cur { animation: none; }
+@keyframes blink { 50% { box-shadow: -2px 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .type-box .cur { animation: none; } }
+.type-hint { color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 10px; }
+.result-grid .fact .v { font-size: 1.5rem; }
+.keys-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.keycap { min-width: 44px; padding: 6px 8px; text-align: center; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg-3); font-family: ui-monospace, monospace; font-size: 0.9rem; }
+.keycap small { display: block; color: var(--text-muted); font-size: 0.65rem; }
+.keycap.hot { border-color: var(--bad); }
+.lesson-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 10px; }
+.lesson-btn { text-align: left; display: block; width: 100%; line-height: 1.4; }
+.lesson-btn small { display: block; color: var(--text-muted); font-size: 0.78rem; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--text-muted); font-size: 10px; }
+.chart .grid { stroke: var(--border); stroke-width: 1; }
+.chart .best { fill: none; stroke: var(--accent); stroke-width: 2; }
+.chart .raw  { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.chart circle { fill: var(--accent); }
+.touch-note { display: none; }
+@media (pointer: coarse) { .touch-note { display: block; } }

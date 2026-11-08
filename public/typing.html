@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Octopus Tools — Typing</title>
+  <link rel="stylesheet" href="/styles/main.css?v=aede35c6" />
+  <link rel="stylesheet" href="/styles/tool.css?v=1f8d696a" />
+  <link rel="icon" type="image/svg+xml" href="https://auth.octopustechnology.net/brand/tools/favicon.svg">
+  <link rel="apple-touch-icon" href="https://auth.octopustechnology.net/brand/tools/apple-touch-icon.png">
+  <link rel="manifest" href="https://auth.octopustechnology.net/brand/tools/site.webmanifest" crossorigin="anonymous">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">🐙 Octopus Tools</a>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/speed-reader.html" class="nav-link">Speed Reader</a>
+        <a href="/typing.html" class="nav-link active">Typing</a>
+        <a href="/hash.html" class="nav-link">Hash</a>
+        <a href="/baseconv.html" class="nav-link">Base Conv</a>
+        <a href="/subnet.html" class="nav-link">Subnet</a>
+        <a href="/netcalc.html" class="nav-link">Network</a>
+        <a href="/techcalc.html" class="nav-link">Calc</a>
+        <a href="/password-generator.html" class="nav-link">Password</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Typing</h1>
+    <p class="tagline">Tests, lessons that build up the keyboard, and code with no autocomplete.</p>
+  </section>
+
+  <section class="tool-section">
+
+    <div class="type-note touch-note">This needs a hardware keyboard. A phone or tablet touch keyboard will not work here, but the rest of the page, including your history, is still readable.</div>
+
+    <div class="tabbar" role="tablist" id="modeTabs">
+      <button class="t-btn on" type="button" data-tab="test">Test</button>
+      <button class="t-btn" type="button" data-tab="train">Training</button>
+      <button class="t-btn" type="button" data-tab="code">Code</button>
+      <button class="t-btn" type="button" data-tab="history">History</button>
+    </div>
+
+    <div class="panel" id="tab-test">
+      <h2>Typing test</h2>
+      <div class="row">
+        <span class="field-label">Timer</span>
+        <div class="seg" id="segTime">
+          <button class="t-btn" type="button" data-time="15">15 s</button>
+          <button class="t-btn on" type="button" data-time="30">30 s</button>
+          <button class="t-btn" type="button" data-time="60">60 s</button>
+          <button class="t-btn" type="button" data-time="120">120 s</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="field-label">Word count</span>
+        <div class="seg" id="segWords">
+          <button class="t-btn" type="button" data-words="10">10</button>
+          <button class="t-btn" type="button" data-words="25">25</button>
+          <button class="t-btn" type="button" data-words="50">50</button>
+          <button class="t-btn" type="button" data-words="100">100</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="tab-train">
+      <h2>Training</h2>
+      <p class="lead">Work down the list; each lesson adds keys to the ones before. Finish with 95% accuracy or better to tick it off. Speed comes later.</p>
+      <div class="lesson-list" id="lessonList"></div>
+      <h2 style="margin-top:22px">Your weakest keys</h2>
+      <div class="keys-grid" id="weakKeys"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="t-btn primary" type="button" id="weakDrill">Drill my weak keys</button>
+        <span class="field-label" id="weakMsg"></span>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="tab-code">
+      <h2>Code typing</h2>
+      <p class="lead">Brackets, colons, quotes and indentation, with nothing to complete them for you. <strong>Tab types four spaces.</strong> Enter types a new line. Press Esc to let Tab move focus away again.</p>
+      <div class="row">
+        <div class="seg" id="segLang">
+          <button class="t-btn on" type="button" data-lang="python">Python</button>
+          <button class="t-btn" type="button" data-lang="javascript">JavaScript</button>
+          <button class="t-btn" type="button" data-lang="shell">Shell</button>
+        </div>
+        <select class="t-select" id="snippetSel" aria-label="Snippet"></select>
+        <button class="t-btn" type="button" id="snippetRandom">Random</button>
+      </div>
+    </div>
+
+    <div class="panel" id="runPanel">
+      <h2 id="runTitle">30 second test</h2>
+      <div class="type-hud" aria-live="off">
+        <span>Time <b id="hudTime">30</b></span>
+        <span>WPM <b id="hudWpm">0</b></span>
+        <span>Accuracy <b id="hudAcc">100%</b></span>
+      </div>
+      <div class="type-box idle" id="typeBox" tabindex="0" role="textbox" aria-label="Typing area. Click here and start typing."></div>
+      <p class="type-hint" id="typeHint">Click the box and start typing; the clock starts on your first key. Backspace works.</p>
+      <div class="row" style="margin-top:12px">
+        <button class="t-btn primary" type="button" id="restart">New text</button>
+        <button class="t-btn" type="button" id="retry">Same text again</button>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="resultPanel">
+      <h2 id="resultTitle">Result</h2>
+      <div id="resultFlags"></div>
+      <div class="result-grid" id="resultGrid"></div>
+      <h2 style="margin-top:20px">Errors per key</h2>
+      <div class="keys-grid" id="resultKeys"></div>
+      <p class="type-hint" id="storeNote"></p>
+    </div>
+
+    <div class="panel hidden" id="tab-history">
+      <h2>Personal bests</h2>
+      <div class="table-wrap"><table class="data" id="bestTable"></table></div>
+      <h2 style="margin-top:22px">Progress</h2>
+      <div class="row"><select class="t-select" id="chartBucket" aria-label="Which results to chart"></select></div>
+      <div id="chartBox" style="margin-top:12px"></div>
+      <p class="type-hint">Solid line: your best WPM so far. Dashed: each result.</p>
+      <h2 style="margin-top:22px">Recent</h2>
+      <div class="table-wrap tall"><table class="data" id="recentTable"></table></div>
+      <div class="row" style="margin-top:14px"><button class="t-btn" type="button" id="clearHistory">Clear history</button></div>
+      <p class="type-hint">Results are kept in this browser only, never sent anywhere.</p>
+    </div>
+
+    <div class="panel">
+      <h2>How it is scored</h2>
+      <details>
+        <summary>WPM, raw WPM and accuracy</summary>
+        <div class="ref-body">
+          <p><strong>WPM</strong> counts the correct characters left on screen, five to a word, divided by minutes. <strong>Raw WPM</strong> counts every key you pressed, right or wrong. <strong>Accuracy</strong> is correct keystrokes over all keystrokes, so a mistake you backspace over still counts: you made it.</p>
+        </div>
+      </details>
+    </div>
+
+  </section>
+
+  <footer class="site-footer">
+    <a href="https://octopustechnology.net" target="_blank" rel="noopener">Octopus Technology</a>
+  </footer>
+
+  <script src="/scripts/typing.js?v=8006c2b8"></script>
+  <script>
+  (function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const fact = (k, v) => `<div class="fact"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`;
+    const table = (head, rows) =>
+      '<thead><tr>' + head.map(h => `<th>${esc(h)}</th>`).join('') + '</tr></thead><tbody>' +
+      rows.map(r => '<tr>' + r.map(c => `<td>${esc(c)}</td>`).join('') + '</tr>').join('') + '</tbody>';
+
+    let storage = null;
+    try { storage = window.localStorage; } catch (e) { storage = null; }
+    let store = Typing.load(storage);
+    let storageOk = true;
+
+    let tab = 'test';
+    let cfg = { time: 30, words: 0, lang: 'python', snippet: 0 };
+    let run = null;       // { bucket, title, text, code, limitMs, session, label }
+    let timer = null;
+
+    const box = $('typeBox');
+
+    // ── Preparing a run ───────────────────────────────────────────────────────
+    function prepare(spec) {
+      stopTimer();
+      run = Object.assign({ session: null, code: false, limitMs: 0 }, spec);
+      run.session = Typing.createSession(run.text, { code: run.code, limitMs: run.limitMs });
+      $('runTitle').textContent = run.title;
+      $('resultPanel').classList.add('hidden');
+      $('hudTime').textContent = run.limitMs ? String(run.limitMs / 1000) : '0';
+      $('hudWpm').textContent = '0';
+      $('hudAcc').textContent = '100%';
+      box.classList.toggle('code', !!run.code);
+      box.classList.add('idle');
+      $('typeHint').textContent = run.code
+        ? 'Click the box and start typing. Tab types four spaces, Enter a new line, Esc lets Tab leave the box.'
+        : 'Click the box and start typing; the clock starts on your first key. Backspace works.';
+      paint();
+    }
+
+    function newText() {
+      if (tab === 'test' || tab === 'history') {
+        if (cfg.words) {
+          prepare({ bucket: `words-${cfg.words}`, title: `${cfg.words} word test`,
+                    text: Typing.randomWords(cfg.words).join(' ') });
+        } else {
+          prepare({ bucket: `time-${cfg.time}`, title: `${cfg.time} second test`, limitMs: cfg.time * 1000,
+                    text: Typing.randomWords(Math.max(120, cfg.time * 4)).join(' ') });
+        }
+      } else if (tab === 'code') {
+        const list = Typing.SNIPPETS[cfg.lang];
+        const s = list[cfg.snippet] || list[0];
+        prepare({ bucket: `code-${cfg.lang}`, title: `${cfg.lang}: ${s.title}`, text: s.code, code: true });
+      }
+    }
+
+    // ── Painting the text ─────────────────────────────────────────────────────
+    function paint() {
+      const typed = run.session.typed(), text = run.text;
+      let html = '';
+      for (let i = 0; i < text.length; i++) {
+        let ch = text[i];
+        let cls = i < typed.length ? (typed[i] === ch ? 'ok' : 'bad') : 'todo';
+        if (i === typed.length && !run.session.isDone()) cls += ' cur';
+        // A missed space or newline must be visible, or the red highlight has nothing to sit on.
+        let shown = esc(ch);
+        if (ch === '\n') shown = (i < typed.length && typed[i] !== ch ? '&#8629;' : '') + '\n';
+        else if (ch === ' ' && i < typed.length && typed[i] !== ch) shown = '&middot;';
+        html += `<span class="${cls}">${shown}</span>`;
+      }
+      box.innerHTML = html;
+      const cur = box.querySelector('.cur');
+      if (cur && typeof cur.offsetTop === 'number') box.scrollTop = Math.max(0, cur.offsetTop - box.clientHeight / 2);
+    }
+
+    function hud(now) {
+      const st = run.session.stats(now);
+      $('hudWpm').textContent = String(Math.round(st.wpm));
+      $('hudAcc').textContent = Math.round(st.accuracy) + '%';
+      if (run.limitMs) $('hudTime').textContent = String(Math.max(0, Math.ceil((run.limitMs - st.elapsedMs) / 1000)));
+      else $('hudTime').textContent = String(Math.floor(st.elapsedMs / 1000));
+      return st;
+    }
+
+    function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+    function startTimer() {
+      stopTimer();
+      timer = setInterval(() => {
+        const now = Date.now();
+        if (run.session.isDone()) return finish();
+        if (run.limitMs && run.session.stats(now).elapsedMs >= run.limitMs) return finish();
+        hud(now);
+      }, 200);
+    }
+
+    // ── Keys ──────────────────────────────────────────────────────────────────
+    box.addEventListener('keydown', e => {
+      if (!run) return;
+      if (e.key === 'Escape') { box.blur(); return; }
+      if (e.metaKey || (e.ctrlKey && !e.altKey)) return;           // browser shortcuts stay browser shortcuts
+      if (run.session.isDone()) return;
+      const wasStarted = run.session.started();
+      const handled = run.session.press(e.key, Date.now());
+      const takesKey = e.key === 'Backspace' || e.key === ' ' || e.key === "'" || e.key === '/' ||
+                       (run.code && (e.key === 'Tab' || e.key === 'Enter'));
+      if (handled || takesKey) e.preventDefault();
+      if (!handled) { if (run.session.isDone()) finish(); return; }
+      if (!wasStarted && run.session.started()) { box.classList.remove('idle'); startTimer(); }
+      paint();
+      hud(Date.now());
+      if (run.session.isDone()) finish();
+    });
+
+    // ── Finishing ─────────────────────────────────────────────────────────────
+    function finish() {
+      stopTimer();
+      const now = Date.now();
+      run.session.finish(now);
+      const st = hud(now);
+      box.classList.add('idle');
+      paint();
+      const prevBest = (Typing.bests(store)[run.bucket] || { wpm: 0 }).wpm;
+      Typing.record(store, run.bucket, st, now);
+      let flags = '';
+      if (st.wpm > prevBest && st.keystrokes > 0)
+        flags += `<div class="flag good">${prevBest ? 'New personal best for this mode.' : 'First result for this mode: that is your starting best.'}</div>`;
+      if (run.lesson) {
+        const passed = Typing.lessonPassed(st);
+        const L = store.lessons[run.lesson] || (store.lessons[run.lesson] = { best: 0, done: false });
+        L.best = Math.max(L.best, Math.round(st.wpm));
+        if (passed) L.done = true;
+        flags += passed ? '<div class="flag good">Lesson passed: accuracy was ' + Math.round(st.accuracy) + '%.</div>'
+                        : `<div class="flag">Accuracy was ${Math.round(st.accuracy)}%; ${Typing.PASS_ACCURACY}% or better passes this lesson. Slow down a little and go again.</div>`;
+      }
+      storageOk = Typing.save(storage, store);
+      $('resultTitle').textContent = 'Result: ' + run.title;
+      $('resultFlags').innerHTML = flags;
+      $('resultGrid').innerHTML = [
+        fact('WPM', st.wpm.toFixed(1)), fact('Raw WPM', st.raw.toFixed(1)), fact('Accuracy', st.accuracy.toFixed(1) + '%'),
+        fact('Errors', st.errors), fact('Time', (st.elapsedMs / 1000).toFixed(1) + ' s'), fact('Backspaces', st.backspaces)
+      ].join('');
+      const keys = Object.entries(st.errorsPerKey).filter(([, v]) => v.err > 0).sort((a, b) => b[1].err - a[1].err);
+      $('resultKeys').innerHTML = keys.length
+        ? keys.map(([k, v]) => `<div class="keycap hot">${esc(k === ' ' ? 'space' : k === '\n' ? 'enter' : k)}<small>${v.err} of ${v.n}</small></div>`).join('')
+        : '<span class="muted">No mistakes.</span>';
+      $('storeNote').textContent = storageOk ? '' : 'Your browser is not letting this page save history, so this result will not be kept. Everything else still works.';
+      $('resultPanel').classList.remove('hidden');
+      renderTraining(); renderHistory();
+    }
+
+    // ── Training ──────────────────────────────────────────────────────────────
+    function renderTraining() {
+      $('lessonList').innerHTML = Typing.LESSONS.map((l, i) => {
+        const s = store.lessons[l.id];
+        return `<button class="t-btn lesson-btn${s && s.done ? ' on' : ''}" type="button" data-lesson="${l.id}">` +
+               `${i + 1}. ${esc(l.title)}${s && s.done ? ' &#10003;' : ''}<small>${esc(l.blurb)}</small></button>`;
+      }).join('');
+      const weak = Typing.weakKeys(store.keys);
+      $('weakKeys').innerHTML = weak.length
+        ? weak.map(w => `<div class="keycap hot">${esc(w.key)}<small>${Math.round(w.rate * 100)}% off</small></div>`).join('')
+        : '<span class="muted">Nothing yet. Keys show up here once you have pressed them a few times and missed some.</span>';
+    }
+    $('lessonList').addEventListener('click', e => {
+      let el = e.target;
+      while (el && !(el.dataset && el.dataset.lesson)) el = el.parentNode;
+      if (!el) return;
+      const l = Typing.lessonById(el.dataset.lesson);
+      if (!l) return;
+      prepare({ bucket: `lesson-${l.id}`, title: `Lesson: ${l.title}`, lesson: l.id, text: Typing.lessonDrill(l, 30) });
+      box.focus();
+    });
+    $('weakDrill').addEventListener('click', () => {
+      const d = Typing.weakDrill(store.keys, 30);
+      if (!d.ok) { $('weakMsg').textContent = d.error; return; }
+      $('weakMsg').textContent = '';
+      prepare({ bucket: 'weak', title: 'Weak-key drill: ' + d.weak.map(w => w.key).join(' '), text: d.text });
+      box.focus();
+    });
+
+    // ── Code ──────────────────────────────────────────────────────────────────
+    function fillSnippets() {
+      const list = Typing.SNIPPETS[cfg.lang];
+      $('snippetSel').innerHTML = list.map((s, i) => `<option value="${i}">${esc(s.title)}</option>`).join('');
+      $('snippetSel').value = String(cfg.snippet);
+    }
+
+    // ── History ───────────────────────────────────────────────────────────────
+    function renderHistory() {
+      const b = Typing.bests(store);
+      const names = Object.keys(b).sort();
+      $('bestTable').innerHTML = names.length
+        ? table(['Mode', 'Best WPM', 'Accuracy', 'Date'], names.map(n => [n, b[n].wpm, b[n].acc + '%', new Date(b[n].at).toISOString().slice(0, 10)]))
+        : table(['Mode', 'Best WPM'], [['No results yet', '']]);
+      const sel = $('chartBucket'), keep = sel.value;
+      sel.innerHTML = ['<option value="">All results</option>'].concat(names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`)).join('');
+      sel.value = names.includes(keep) ? keep : '';
+      $('chartBox').innerHTML = chart(Typing.bestSeries(store, sel.value));
+      $('recentTable').innerHTML = table(['Mode', 'WPM', 'Raw', 'Acc', 'Errors'],
+        store.results.slice(-15).reverse().map(r => [r.bucket, r.wpm, r.raw, r.acc + '%', r.errors]));
+    }
+    function chart(series) {
+      if (series.length < 2) return '<p class="muted">Two or more results are needed to draw a line.</p>';
+      const W = 600, H = 200, L = 34, R = 8, T = 10, B = 18;
+      const max = Math.max(10, Math.ceil(Math.max(...series.map(s => Math.max(s.wpm, s.best))) / 10) * 10);
+      const x = i => L + (i / (series.length - 1)) * (W - L - R);
+      const y = v => T + (1 - v / max) * (H - T - B);
+      const line = key => series.map((s, i) => `${x(i).toFixed(1)},${y(s[key]).toFixed(1)}`).join(' ');
+      let g = '';
+      for (let k = 0; k <= 4; k++) {
+        const v = (max / 4) * k;
+        g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 4}" y="${y(v) + 3}" text-anchor="end">${Math.round(v)}</text>`;
+      }
+      return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="WPM over time">${g}` +
+             `<polyline class="raw" points="${line('wpm')}"/><polyline class="best" points="${line('best')}"/>` +
+             `<circle cx="${x(series.length - 1)}" cy="${y(series[series.length - 1].best)}" r="3"/></svg>`;
+    }
+    $('chartBucket').addEventListener('change', () => { $('chartBox').innerHTML = chart(Typing.bestSeries(store, $('chartBucket').value)); });
+    $('clearHistory').addEventListener('click', () => {
+      if (typeof confirm === 'function' && !confirm('Delete all typing history stored in this browser?')) return;
+      store = Typing.emptyStore(); Typing.save(storage, store); renderTraining(); renderHistory();
+    });
+
+    // ── Tabs and config ───────────────────────────────────────────────────────
+    function setTab(t) {
+      tab = t;
+      for (const b of $('modeTabs').querySelectorAll('.t-btn')) b.classList.toggle('on', b.dataset.tab === t);
+      for (const id of ['test', 'train', 'code']) $('tab-' + id).classList.toggle('hidden', id !== t);
+      $('tab-history').classList.toggle('hidden', t !== 'history');
+      $('runPanel').classList.toggle('hidden', t === 'history');
+      if (t === 'history') renderHistory(); else if (t === 'train') { renderTraining(); if (!run || !run.lesson) prepare(lessonSpec(Typing.LESSONS[0])); } else newText();
+    }
+    function lessonSpec(l) { return { bucket: `lesson-${l.id}`, title: `Lesson: ${l.title}`, lesson: l.id, text: Typing.lessonDrill(l, 30) }; }
+
+    $('modeTabs').addEventListener('click', e => { if (e.target && e.target.dataset && e.target.dataset.tab) setTab(e.target.dataset.tab); });
+    function mark(group, attr, value) { for (const b of group.querySelectorAll('.t-btn')) b.classList.toggle('on', b.dataset[attr] === String(value)); }
+    $('segTime').addEventListener('click', e => {
+      if (!e.target || !e.target.dataset || !e.target.dataset.time) return;
+      cfg.time = Number(e.target.dataset.time); cfg.words = 0; mark($('segTime'), 'time', cfg.time); mark($('segWords'), 'words', ''); newText();
+    });
+    $('segWords').addEventListener('click', e => {
+      if (!e.target || !e.target.dataset || !e.target.dataset.words) return;
+      cfg.words = Number(e.target.dataset.words); mark($('segWords'), 'words', cfg.words); mark($('segTime'), 'time', ''); newText();
+    });
+    $('segLang').addEventListener('click', e => {
+      if (!e.target || !e.target.dataset || !e.target.dataset.lang) return;
+      cfg.lang = e.target.dataset.lang; cfg.snippet = 0; mark($('segLang'), 'lang', cfg.lang); fillSnippets(); newText();
+    });
+    $('snippetSel').addEventListener('change', () => { cfg.snippet = Number($('snippetSel').value); newText(); });
+    $('snippetRandom').addEventListener('click', () => {
+      cfg.snippet = Math.floor(Math.random() * Typing.SNIPPETS[cfg.lang].length); $('snippetSel').value = String(cfg.snippet); newText();
+    });
+    $('restart').addEventListener('click', () => {
+      if (tab === 'train' && run && run.lesson) prepare(lessonSpec(Typing.lessonById(run.lesson))); else newText();
+      box.focus();
+    });
+    $('retry').addEventListener('click', () => { prepare({ bucket: run.bucket, title: run.title, text: run.text, code: run.code, limitMs: run.limitMs, lesson: run.lesson }); box.focus(); });
+    box.addEventListener('click', () => box.focus());
+
+    fillSnippets();
+    renderTraining();
+    renderHistory();
+    newText();
+  })();
+  </script>
+</body>
+</html>

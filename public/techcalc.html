@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Octopus Tools — Tech Calculators</title>
+  <link rel="stylesheet" href="/styles/main.css?v=aede35c6" />
+  <link rel="stylesheet" href="/styles/tool.css?v=1f8d696a" />
+  <link rel="icon" type="image/svg+xml" href="https://auth.octopustechnology.net/brand/tools/favicon.svg">
+  <link rel="apple-touch-icon" href="https://auth.octopustechnology.net/brand/tools/apple-touch-icon.png">
+  <link rel="manifest" href="https://auth.octopustechnology.net/brand/tools/site.webmanifest" crossorigin="anonymous">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">🐙 Octopus Tools</a>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/speed-reader.html" class="nav-link">Speed Reader</a>
+        <a href="/typing.html" class="nav-link">Typing</a>
+        <a href="/hash.html" class="nav-link">Hash</a>
+        <a href="/baseconv.html" class="nav-link">Base Conv</a>
+        <a href="/subnet.html" class="nav-link">Subnet</a>
+        <a href="/netcalc.html" class="nav-link">Network</a>
+        <a href="/techcalc.html" class="nav-link active">Calc</a>
+        <a href="/password-generator.html" class="nav-link">Password</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Tech Calculators</h1>
+    <p class="tagline">Bits, sizes, clocks and permissions.</p>
+  </section>
+
+  <section class="tool-section">
+
+    <p class="lead muted" style="margin-bottom:20px">Number bases and two's complement are on the <a href="/baseconv.html">base converter</a>; the prefix and mask table is on the <a href="/subnet.html">subnet calculator</a>.</p>
+
+    <div class="panel">
+      <h2>Bitwise playground</h2>
+      <div class="row">
+        <label class="field-label" for="bwA">A</label>
+        <input class="t-input" id="bwA" type="text" value="0xB6" spellcheck="false" autocomplete="off" autocapitalize="off" />
+      </div>
+      <div class="row">
+        <label class="field-label" for="bwB">B</label>
+        <input class="t-input" id="bwB" type="text" value="0b00001111" spellcheck="false" autocomplete="off" autocapitalize="off" />
+      </div>
+      <div class="row">
+        <select class="t-select" id="bwOp" aria-label="Operation"></select>
+        <select class="t-select" id="bwWidth" aria-label="Width in bits">
+          <option value="8" selected>8-bit</option><option value="16">16-bit</option>
+          <option value="32">32-bit</option><option value="64">64-bit</option>
+        </select>
+      </div>
+      <p class="error-msg" id="bwError"></p>
+      <pre class="work" id="bwWork" style="margin-top:12px"></pre>
+      <div class="facts" id="bwFacts" style="margin-top:12px"></div>
+      <p class="lead" style="margin-top:12px">Accepts decimal, <code>0x</code> hex, <code>0b</code> binary, <code>0o</code> octal, and a leading minus as two's complement at the chosen width.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Data size and transfer time</h2>
+      <div class="row">
+        <input class="t-input short" id="dsValue" type="text" inputmode="decimal" value="4.7" aria-label="Size" />
+        <select class="t-select" id="dsUnit" aria-label="Size unit"></select>
+        <span class="field-label">over</span>
+        <input class="t-input short" id="dsRate" type="text" inputmode="decimal" value="100" aria-label="Link speed" />
+        <select class="t-select" id="dsRateUnit" aria-label="Speed unit"></select>
+      </div>
+      <p class="error-msg" id="dsError"></p>
+      <div class="facts" id="dsFacts" style="margin-top:12px"></div>
+      <p class="lead" style="margin-top:12px">Network speeds are bits per second and decimal (SI): 100 Mbps is 100,000,000 bits a second, which is 12.5 MB/s at best. File sizes in operating systems are often binary (IEC): a GiB is 1,073,741,824 bytes, a GB is 1,000,000,000. Real transfers lose some to protocol overhead; this is the ideal.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Unix timestamp &#8644; date</h2>
+      <div class="row">
+        <label class="field-label" for="tsZone">Zone</label>
+        <input class="t-input" id="tsZone" type="text" value="America/New_York" spellcheck="false" autocomplete="off" autocapitalize="off" />
+        <button class="t-btn" id="tsNow" type="button">Now</button>
+      </div>
+      <div class="row">
+        <label class="field-label" for="tsIn">Timestamp</label>
+        <input class="t-input" id="tsIn" type="text" inputmode="numeric" value="1794166200" spellcheck="false" autocomplete="off" />
+      </div>
+      <p class="error-msg" id="tsError"></p>
+      <div class="facts" id="tsFacts" style="margin-top:12px"></div>
+      <div class="row" style="margin-top:20px">
+        <label class="field-label" for="dtIn">Date</label>
+        <input class="t-input" id="dtIn" type="text" value="2026-11-08 14:30:00" spellcheck="false" autocomplete="off" placeholder="2026-11-08 14:30:00" />
+      </div>
+      <p class="error-msg" id="dtError"></p>
+      <div class="facts" id="dtFacts" style="margin-top:12px"></div>
+      <p class="lead" style="margin-top:12px">A date is read as wall-clock time in the zone above. Numbers of 12 digits or more are taken as milliseconds.</p>
+    </div>
+
+    <div class="panel">
+      <h2>chmod &#8644; permissions</h2>
+      <div class="row">
+        <label class="field-label" for="cmOct">Octal</label>
+        <input class="t-input short" id="cmOct" type="text" inputmode="numeric" value="755" maxlength="4" spellcheck="false" autocomplete="off" />
+        <label class="field-label" for="cmSym">Symbolic</label>
+        <input class="t-input" id="cmSym" type="text" value="rwxr-xr-x" spellcheck="false" autocomplete="off" autocapitalize="off" />
+      </div>
+      <p class="error-msg" id="cmError"></p>
+      <div class="facts" id="cmFacts" style="margin-top:12px"></div>
+      <pre class="work" id="cmCommand" style="margin-top:12px"></pre>
+    </div>
+
+  </section>
+
+  <footer class="site-footer">
+    <a href="https://octopustechnology.net" target="_blank" rel="noopener">Octopus Technology</a>
+  </footer>
+
+  <script src="/scripts/techcalc.js?v=8da410db"></script>
+  <script>
+  (function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const fact = (k, v, wide) => `<div class="fact${wide ? ' wide' : ''}"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`;
+    const num = n => (Number.isInteger(n) ? String(n) : String(+n.toPrecision(7)));
+    const opts = (el, list, sel) => { el.innerHTML = list.map(v => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(v)}</option>`).join(''); };
+
+    opts($('bwOp'), TechCalc.OPS, 'AND');
+    opts($('dsUnit'), Object.keys(TechCalc.SIZE_UNITS), 'GiB');
+    opts($('dsRateUnit'), Object.keys(TechCalc.RATE_UNITS), 'Mbps');
+
+    function renderBitwise() {
+      const op = $('bwOp').value, w = Number($('bwWidth').value);
+      const r = TechCalc.bitwise($('bwA').value, $('bwB').value, w, op);
+      if (!r.ok) { $('bwError').textContent = r.error; $('bwWork').textContent = ''; $('bwFacts').innerHTML = ''; return; }
+      $('bwError').textContent = '';
+      const unary = op === 'NOT A';
+      $('bwWork').textContent =
+        `A   ${r.binary.a}\n` + (unary ? '' : `B   ${r.binary.b}\n`) + `=   ${r.binary.result}   (${op})`;
+      $('bwFacts').innerHTML = [fact('Hex', '0x' + r.hex), fact('Unsigned', r.unsigned), fact('Signed (two\'s complement)', r.signed)].join('');
+    }
+
+    function renderSize() {
+      const r = TechCalc.dataSize($('dsValue').value, $('dsUnit').value, $('dsRate').value, $('dsRateUnit').value);
+      if (!r.ok) { $('dsError').textContent = r.error; $('dsFacts').innerHTML = ''; return; }
+      $('dsError').textContent = '';
+      const c = r.conversions;
+      $('dsFacts').innerHTML = (r.duration ? fact('Transfer time', r.duration, true) : '') + [
+        fact('Bits', num(c.bit)), fact('Bytes', num(c.B)),
+        fact('kB / MB (SI)', `${num(c.kB)} / ${num(c.MB)}`), fact('GB / TB (SI)', `${num(c.GB)} / ${num(c.TB)}`),
+        fact('KiB / MiB (IEC)', `${num(c.KiB)} / ${num(c.MiB)}`), fact('GiB / TiB (IEC)', `${num(c.GiB)} / ${num(c.TiB)}`)
+      ].join('');
+    }
+
+    function renderStamp() {
+      const r = TechCalc.fromTimestamp($('tsIn').value, $('tsZone').value);
+      if (!r.ok) { $('tsError').textContent = r.error; $('tsFacts').innerHTML = ''; return; }
+      $('tsError').textContent = '';
+      $('tsFacts').innerHTML = [
+        fact(`In ${r.zone}`, `${r.local} ${r.abbreviation} (UTC${r.offset})`, true),
+        fact('UTC', r.iso, true), fact('Read as', r.unit), fact('Seconds', r.seconds)
+      ].join('');
+    }
+    function renderDate() {
+      const r = TechCalc.toTimestamp($('dtIn').value, $('tsZone').value);
+      if (!r.ok) { $('dtError').textContent = r.error; $('dtFacts').innerHTML = ''; return; }
+      $('dtError').textContent = '';
+      $('dtFacts').innerHTML = [
+        fact('Seconds', r.seconds), fact('Milliseconds', r.ms), fact('ISO with offset', r.localIso, true),
+        r.ambiguous ? fact('Ambiguous time', `This clock time happens twice (daylight saving ends). The other one is ${r.alternate}.`, true) : ''
+      ].join('');
+    }
+
+    function showMode(r) {
+      $('cmFacts').innerHTML = [fact('Octal', r.octal), fact('Symbolic', r.symbolic)]
+        .concat(r.who ? r.who.map((t, i) => fact(['Owner', 'Group', 'Others'][i], t.replace(/^\w+: /, ''))) : [])
+        .concat(r.extras && r.extras.length ? [fact('Special bits', r.extras.join(', '))] : []).join('');
+      $('cmCommand').textContent = `chmod ${r.octal} file`;
+    }
+    function fromOctal() {
+      const r = TechCalc.octalToSymbolic($('cmOct').value);
+      if (!r.ok) { $('cmError').textContent = r.error; return; }
+      $('cmError').textContent = ''; $('cmSym').value = r.symbolic; showMode(r);
+    }
+    function fromSymbolic() {
+      const r = TechCalc.symbolicToOctal($('cmSym').value);
+      if (!r.ok) { $('cmError').textContent = r.error; return; }
+      $('cmError').textContent = ''; $('cmOct').value = r.octal; showMode(TechCalc.octalToSymbolic(r.octal));
+    }
+
+    ['bwA', 'bwB', 'bwOp', 'bwWidth'].forEach(id => { $(id).addEventListener('input', renderBitwise); $(id).addEventListener('change', renderBitwise); });
+    ['dsValue', 'dsUnit', 'dsRate', 'dsRateUnit'].forEach(id => { $(id).addEventListener('input', renderSize); $(id).addEventListener('change', renderSize); });
+    $('tsIn').addEventListener('input', renderStamp);
+    $('dtIn').addEventListener('input', renderDate);
+    $('tsZone').addEventListener('input', () => { renderStamp(); renderDate(); });
+    $('tsNow').addEventListener('click', () => { $('tsIn').value = String(Math.floor(Date.now() / 1000)); renderStamp(); });
+    $('cmOct').addEventListener('input', fromOctal);
+    $('cmSym').addEventListener('input', fromSymbolic);
+
+    renderBitwise(); renderSize(); renderStamp(); renderDate(); fromOctal();
+  })();
+  </script>
+</body>
+</html>
