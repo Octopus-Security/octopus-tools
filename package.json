@@ -5,6 +5,8 @@
   "scripts": {
     "stamp": "node tools/stamp-assets.mjs",
     "check": "node tools/stamp-assets.mjs --check",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "kit:sync": "node tools/kit-sync.mjs",
+    "kit:check": "node tools/kit-sync.mjs --check --remote"
   }
 }
