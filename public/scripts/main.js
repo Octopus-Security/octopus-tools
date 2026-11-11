@@ -128,7 +128,7 @@ function charsToWordIndex(text, charIndex) {
 // ===========================
 function loadText(text) {
   if (!text || text.trim().length === 0) {
-    alert('No readable text found.');
+    oDialog.toast('No readable text found.');
     return;
   }
 
@@ -136,7 +136,7 @@ function loadText(text) {
   words = text.split(/\s+/).filter(w => w.length > 0);
 
   if (words.length === 0) {
-    alert('No readable text found.');
+    oDialog.toast('No readable text found.');
     return;
   }
 
@@ -286,7 +286,7 @@ async function handleFile(file) {
   try {
     if (name.endsWith('.pdf')) {
       if (typeof pdfjsLib === 'undefined') {
-        alert('PDF.js failed to load. Please check your internet connection and reload.');
+        oDialog.toast('PDF.js failed to load. Please check your internet connection and reload.', { kind: 'danger' });
         return;
       }
       const raw = await extractPdfText(file);
@@ -297,11 +297,11 @@ async function handleFile(file) {
       const cleaned = cleanText(raw);
       loadText(cleaned);
     } else {
-      alert('Unsupported file type. Please upload a .pdf or .txt file.');
+      oDialog.toast('Unsupported file type. Please upload a .pdf or .txt file.');
     }
   } catch (err) {
     console.error('File read error:', err);
-    alert('Could not read this PDF. Try saving it as text first.');
+    oDialog.toast('Could not read this PDF. Try saving it as text first.', { kind: 'danger' });
   }
 }
 
@@ -340,7 +340,7 @@ dropzone.addEventListener('drop', (e) => {
 useTextBtn.addEventListener('click', () => {
   const text = pasteArea.value;
   if (!text.trim()) {
-    alert('Please paste some text first.');
+    oDialog.toast('Please paste some text first.');
     return;
   }
   loadText(cleanText(text));
@@ -382,7 +382,7 @@ speedBtns.forEach(btn => {
 setWpmBtn.addEventListener('click', () => {
   let val = parseInt(customWpmInput.value, 10);
   if (isNaN(val)) {
-    alert('Please enter a valid number.');
+    oDialog.toast('Please enter a valid number.');
     return;
   }
   val = Math.max(50, Math.min(2000, val));

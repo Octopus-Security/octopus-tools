@@ -1,0 +1,189 @@
+/* vendored from octopus-kit v0.6.0 ui/dialog.css | sha256:b9d8b0f71b1f76f06acc6893262bee3fb5079038900716eba7118f453432bb06 | DO NOT EDIT: node tools/kit-sync.mjs */
+/* octopus-kit ui/dialog.css: styling for ui/dialog.js (alert / confirm / prompt / toast).
+ *
+ * Built on the kit's .o-modal and .o-toast (ui/components.css), which load fine alongside this file but are
+ * not required: every rule here is scoped to .o-dialog / .o-dialog-toasts and carries its own fallbacks, so an
+ * app WITHOUT kit tokens still gets a themed dialog.
+ *
+ * Every colour resolves as  var(--o-x, var(--app-var, <literal>))  : the kit token first, then the app's own
+ * var (--surface, --bg, --text, --muted, --border, --accent, --danger ...), then a literal for light or dark.
+ * Light/dark follows prefers-color-scheme, overridden by the [data-theme] the kit's theme-boot sets.
+ * This file is exempt from the "no colour literals / no non-kit vars" ui tests for exactly that reason;
+ * test/dialog.test.js holds its own rules.
+ */
+
+/* ---- Palette: light default ---- */
+html .o-dialog,
+html .o-dialog-toasts {
+  --od-bg: var(--o-surface, var(--surface, #ffffff));
+  --od-field: var(--o-bg, var(--bg, #f5f5f0));
+  --od-text: var(--o-text, var(--text, #1c1c1e));
+  --od-muted: var(--o-muted, var(--muted, #5b616b));
+  --od-border: var(--o-border, var(--border, #d4d4cc));
+  --od-accent: var(--o-accent, var(--accent, #1f2937));
+  --od-ink: var(--o-accent-ink, var(--accent-ink, #ffffff));
+  --od-danger: var(--o-danger, var(--danger, #c92a2a));
+  --od-dink: var(--o-dialog-danger-ink, var(--dialog-danger-ink, #ffffff));
+  --od-success: var(--o-success, var(--success, #1a8f5c));
+  --od-info: var(--o-info, var(--info, #1f6fc4));
+  --od-scrim: var(--o-scrim, var(--scrim, rgba(0, 0, 0, 0.45)));
+  --od-shadow: var(--o-shadow-2, var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.25)));
+}
+/* ---- Palette: dark by system preference, unless the page forces light ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .o-dialog,
+  :root:not([data-theme="light"]) .o-dialog-toasts {
+    --od-bg: var(--o-surface, var(--surface, #161a21));
+    --od-field: var(--o-bg, var(--bg, #0f1115));
+    --od-text: var(--o-text, var(--text, #e8e8ea));
+    --od-muted: var(--o-muted, var(--muted, #9aa1ad));
+    --od-border: var(--o-border, var(--border, #2a2f3a));
+    --od-accent: var(--o-accent, var(--accent, #c4c9d4));
+    --od-ink: var(--o-accent-ink, var(--accent-ink, #0b0d10));
+    --od-danger: var(--o-danger, var(--danger, #ff6b6b));
+    --od-dink: var(--o-dialog-danger-ink, var(--dialog-danger-ink, #0b0d10));
+    --od-success: var(--o-success, var(--success, #3ddc97));
+    --od-info: var(--o-info, var(--info, #62b0ff));
+    --od-scrim: var(--o-scrim, var(--scrim, rgba(0, 0, 0, 0.6)));
+    --od-shadow: var(--o-shadow-2, var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.55)));
+  }
+}
+/* ---- Palette: forced by the kit's theme-boot ---- */
+[data-theme="dark"] .o-dialog,
+[data-theme="dark"] .o-dialog-toasts {
+  --od-bg: var(--o-surface, var(--surface, #161a21));
+  --od-field: var(--o-bg, var(--bg, #0f1115));
+  --od-text: var(--o-text, var(--text, #e8e8ea));
+  --od-muted: var(--o-muted, var(--muted, #9aa1ad));
+  --od-border: var(--o-border, var(--border, #2a2f3a));
+  --od-accent: var(--o-accent, var(--accent, #c4c9d4));
+  --od-ink: var(--o-accent-ink, var(--accent-ink, #0b0d10));
+  --od-danger: var(--o-danger, var(--danger, #ff6b6b));
+  --od-dink: var(--o-dialog-danger-ink, var(--dialog-danger-ink, #0b0d10));
+  --od-success: var(--o-success, var(--success, #3ddc97));
+  --od-info: var(--o-info, var(--info, #62b0ff));
+  --od-scrim: var(--o-scrim, var(--scrim, rgba(0, 0, 0, 0.6)));
+  --od-shadow: var(--o-shadow-2, var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.55)));
+}
+[data-theme="light"] .o-dialog,
+[data-theme="light"] .o-dialog-toasts {
+  --od-bg: var(--o-surface, var(--surface, #ffffff));
+  --od-field: var(--o-bg, var(--bg, #f5f5f0));
+  --od-text: var(--o-text, var(--text, #1c1c1e));
+  --od-muted: var(--o-muted, var(--muted, #5b616b));
+  --od-border: var(--o-border, var(--border, #d4d4cc));
+  --od-accent: var(--o-accent, var(--accent, #1f2937));
+  --od-ink: var(--o-accent-ink, var(--accent-ink, #ffffff));
+  --od-danger: var(--o-danger, var(--danger, #c92a2a));
+  --od-dink: var(--o-dialog-danger-ink, var(--dialog-danger-ink, #ffffff));
+  --od-success: var(--o-success, var(--success, #1a8f5c));
+  --od-info: var(--o-info, var(--info, #1f6fc4));
+  --od-scrim: var(--o-scrim, var(--scrim, rgba(0, 0, 0, 0.45)));
+  --od-shadow: var(--o-shadow-2, var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.25)));
+}
+
+/* ---- Dialog ---- */
+.o-modal.o-dialog {
+  box-sizing: border-box;
+  width: 100%; max-width: min(30rem, calc(100vw - 32px));
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  margin: auto; padding: 24px;
+  background: var(--od-bg); color: var(--od-text);
+  border: 1px solid var(--od-border); border-radius: var(--o-radius-lg, 14px);
+  box-shadow: var(--od-shadow);
+  font: inherit; line-height: 1.45;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+.o-modal.o-dialog::backdrop { background: var(--od-scrim); }
+.o-dialog__form { margin: 0; }
+.o-dialog .o-dialog__title { margin: 0 0 12px; font-size: 1.2rem; line-height: 1.25; color: var(--od-text); }
+.o-dialog__body { margin: 0 0 16px; color: var(--od-text); white-space: pre-line; overflow-wrap: break-word; }
+.o-dialog__body:last-child { margin-bottom: 0; }
+.o-dialog__body a { color: var(--od-accent); }
+.o-dialog__label { display: block; margin: 0 0 6px; color: var(--od-muted); font-size: 0.95rem; }
+.o-dialog__token { color: var(--od-text); overflow-wrap: anywhere; }
+.o-dialog .o-dialog__input {
+  display: block; box-sizing: border-box; width: 100%;
+  min-height: 44px; padding: 8px 12px;
+  font: inherit; font-size: max(16px, 1rem);
+  background: var(--od-field); color: var(--od-text);
+  border: 1px solid var(--od-border); border-radius: var(--o-radius-md, 10px);
+}
+.o-dialog .o-dialog__input::placeholder { color: var(--od-muted); opacity: 0.8; }
+.o-dialog .o-dialog__input:focus-visible { outline: 2px solid var(--od-accent); outline-offset: 1px; border-color: var(--od-accent); }
+.o-dialog .o-dialog__input[aria-invalid="true"] { border-color: var(--od-danger); }
+.o-dialog__error { margin: 6px 0 0; color: var(--od-danger); font-size: 0.9rem; }
+.o-dialog .o-dialog__actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+
+.o-dialog .o-dialog__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; min-height: 44px; min-width: 44px; padding: 8px 18px;
+  font: inherit; font-weight: 500; line-height: 1.3; cursor: pointer;
+  background: transparent; color: var(--od-text);
+  border: 1px solid var(--od-border); border-radius: var(--o-radius-md, 10px);
+}
+.o-dialog .o-dialog__btn.o-btn--primary { background: var(--od-accent); color: var(--od-ink); border-color: var(--od-accent); }
+.o-dialog .o-dialog__btn.o-btn--danger { background: var(--od-danger); color: var(--od-dink); border-color: var(--od-danger); }
+.o-dialog .o-dialog__btn:focus-visible { outline: 2px solid var(--od-accent); outline-offset: 2px; }
+.o-dialog .o-dialog__btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+@media (hover: hover) {
+  .o-dialog .o-dialog__btn:not([disabled]):hover { filter: brightness(1.1); }
+}
+
+/* No <dialog>.showModal: ui/dialog.js adds .o-dialog--fallback and the dim layer is a giant box-shadow. */
+.o-dialog--fallback {
+  position: fixed; inset: 0; z-index: 1200; height: fit-content;
+  box-shadow: 0 0 0 100vmax var(--od-scrim);
+}
+.o-dialog--fallback:not([open]) { display: none; }
+
+@keyframes o-dialog-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes o-dialog-sheet { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .o-modal.o-dialog[open] { animation: o-dialog-in 160ms ease-out; }
+}
+
+/* ---- Phones: bottom sheet ---- */
+@media (max-width: 767.98px) {
+  .o-modal.o-dialog {
+    max-width: 100%; margin: auto 0 0; border-radius: var(--o-radius-lg, 14px) var(--o-radius-lg, 14px) 0 0;
+    border-bottom: 0;
+    padding: 20px max(16px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    max-height: 90vh; max-height: 90dvh;
+  }
+  .o-dialog .o-dialog__actions { flex-direction: column-reverse; }
+  .o-dialog .o-dialog__btn { width: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .o-modal.o-dialog[open] { animation: o-dialog-sheet 200ms ease-out; }
+  }
+}
+
+/* ---- Toasts ---- */
+.o-toast-region.o-dialog-toasts {
+  position: fixed; z-index: 1300; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  max-width: calc(100vw - 32px); width: 24rem;
+}
+.o-toast.o-dialog-toast {
+  pointer-events: auto; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-width: 0; padding: 10px 6px 10px 16px;
+  background: var(--od-bg); color: var(--od-text);
+  border: 1px solid var(--od-border); border-left: 4px solid var(--od-info); border-radius: var(--o-radius-md, 10px);
+  box-shadow: var(--od-shadow); overflow-wrap: anywhere; white-space: pre-line;
+}
+.o-toast.o-dialog-toast.o-toast--success { border-left-color: var(--od-success); }
+.o-toast.o-dialog-toast.o-toast--danger { border-left-color: var(--od-danger); }
+.o-toast.o-dialog-toast.o-toast--warn { border-left-color: var(--od-danger); }
+.o-dialog-toast__msg { flex: 1 1 auto; min-width: 0; }
+.o-dialog-toast__close {
+  flex: none; min-width: 44px; min-height: 44px; margin: -10px 0;
+  font: inherit; font-size: 1.4rem; line-height: 1; background: none; border: 0; border-radius: 8px;
+  color: var(--od-muted); cursor: pointer;
+}
+.o-dialog-toast__close:focus-visible { outline: 2px solid var(--od-accent); outline-offset: -2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .o-toast.o-dialog-toast { animation: o-dialog-in 160ms ease-out; }
+}
+@media (max-width: 767.98px) {
+  .o-toast-region.o-dialog-toasts { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: auto; max-width: none; }
+}
