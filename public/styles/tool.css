@@ -142,3 +142,7 @@ code { font-family: ui-monospace, 'Courier New', monospace; font-size: 0.9em;
 .chart circle { fill: var(--accent); }
 .touch-note { display: none; }
 @media (pointer: coarse) { .touch-note { display: block; } }
+
+/* Layout & text rules (octopus-kit docs/layout.md rules 1-7): only what this app did not already have. */
+img, video, svg { max-width: 100%; }
+img, video { height: auto; }
