@@ -112,7 +112,13 @@
     }
     .result-line { font-family: ui-monospace, 'Courier New', monospace; font-size: 0.95rem; margin-top: 12px; }
     .result-line .muted { color: var(--text-muted); font-size: 0.85rem; }
-  </style>
+  
+/* Inputs are 16px on phones so iOS Safari does not zoom on focus (octopus-kit layout.md rule 12). !important because
+   page and component rules size their own inputs with a more specific selector. */
+@media (max-width: 640px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea { font-size: 16px !important; }
+}
+</style>
 </head>
 <body>
 

@@ -55,7 +55,7 @@
     .answer-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
     .answer-value {
       font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
-      font-size: 1.5rem; line-height: 1.45; word-break: break-all; color: var(--text);
+      font-size: 1.5rem; line-height: 1.45; overflow-wrap: anywhere; color: var(--text);
     }
     .answer-value.placeholder { color: var(--text-muted); font-size: 1rem; font-family: inherit; }
     .answer-sub { color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; }
@@ -76,7 +76,7 @@
     .cell-label { font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
     .cell-value {
       font-family: ui-monospace, 'Courier New', monospace; font-size: 0.9rem;
-      word-break: break-all; line-height: 1.45; min-height: 1.3em;
+      overflow-wrap: anywhere; line-height: 1.45; min-height: 1.3em;
     }
     .cell-value.empty { color: var(--text-muted); }
 
@@ -129,7 +129,13 @@
       .num-input { flex-basis: 100%; }
       .answer-value { font-size: 1.2rem; }
     }
-  </style>
+  
+/* Inputs are 16px on phones so iOS Safari does not zoom on focus (octopus-kit layout.md rule 12). !important because
+   page and component rules size their own inputs with a more specific selector. */
+@media (max-width: 640px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea { font-size: 16px !important; }
+}
+</style>
 </head>
 <body>
 
