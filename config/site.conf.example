@@ -1,0 +1,17 @@
+# Optional. Copy to config/site.conf, then rebuild the image.
+# Every line may be left out; the page then uses files served by this container
+# and makes no request to any other host.
+# Plain KEY=value lines: no quotes, and no | & \ < > " characters in a value.
+
+# Folder holding favicon.svg, apple-touch-icon.png and site.webmanifest.
+#BRAND_BASE=https://example.com/brand
+
+# The link at the bottom of every page (set both).
+#FOOTER_NAME=Example
+#FOOTER_URL=https://example.com
+
+# Folder holding pdf.min.js and pdf.worker.min.js (default: the bundled copy).
+#PDFJS_BASE=https://cdn.example.com/pdfjs
+
+# Development only: where tools/kit-sync.mjs downloads the dialog from.
+#KIT_REPO=owner/repo

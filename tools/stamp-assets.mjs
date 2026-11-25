@@ -20,9 +20,6 @@
  *
  *   node tools/stamp-assets.mjs           # rewrite the links
  *   node tools/stamp-assets.mjs --check   # fail if any is stale (for CI/pre-push)
- *
- * Ported from OctopusTechnology/tools/stamp-assets.mjs, which is the same
- * problem in the same shape: a hand-maintained static site with no build step.
  */
 
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
@@ -45,7 +42,11 @@ function assetsUnder(dir, prefix = '') {
     .map(e => `${prefix}${dir}/${e.name}`)
     .sort();
 }
-const ASSETS = [...assetsUnder('styles'), ...assetsUnder('scripts')];
+function vendorAssets() {
+  return readdirSync(join(PUBLIC, 'vendor'), { withFileTypes: true })
+    .filter(e => e.isDirectory()).flatMap(e => assetsUnder(`vendor/${e.name}`)).sort();
+}
+const ASSETS = [...assetsUnder('styles'), ...assetsUnder('scripts'), ...vendorAssets()];
 
 const hashOf = rel =>
   createHash('sha256').update(readFileSync(join(PUBLIC, rel))).digest('hex').slice(0, 8);

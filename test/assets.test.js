@@ -109,7 +109,7 @@ test('HTML is still never cached — it is what points at the stamped URLs', () 
  * `import './bases.js'` resolves against the importer's URL WITHOUT its query
  * string, so the imported file keeps coming from Cloudflare's four-hour cache
  * after a deploy — one stale sibling, looking exactly like a deploy that never
- * landed. octopus-ee hit that and had to version the whole directory.
+ * landed. Another site hit that and had to version the whole directory.
  *
  * So the shared modules here are classic scripts with no import graph, and this
  * is the guard that keeps them that way. Delete it and the failure returns

@@ -1,0 +1,9 @@
+# Self-host example:  docker compose -f docker-compose.example.yml up -d --build
+# Bound to this machine only. To reach it from elsewhere, put a reverse proxy with
+# TLS in front rather than publishing the port on every interface.
+services:
+  tools:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${TOOLS_PORT:-8080}:80"
