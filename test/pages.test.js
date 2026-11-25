@@ -133,19 +133,20 @@ function makeDocument(html) {
     getElementById: id  => { const n = all.find(e => e.attrs && e.attrs.id === id); return n ? wrap(n) : null; },
     createElement:  tag => wrap({ tag, attrs: {}, children: [], parent: null }),
     querySelector:  sel => { const n = all.find(e => matches(e, sel)); return n ? wrap(n) : null; },
+    querySelectorAll: sel => all.filter(e => matches(e, sel)).map(wrap),
     addEventListener() {}
   };
 }
 
 // ── Boot each page the way a browser would ───────────────────────────────────
 
-function boot(page) {
+function boot(page, extra = {}) {
   const html = fs.readFileSync(path.join(pub, page), 'utf8');
   const sandbox = {
     document: makeDocument(html),
     navigator: { clipboard: { writeText: () => Promise.resolve() } },
     setTimeout: () => 0, clearTimeout: () => {},
-    console, Math, JSON, Array, Object, String, Number, BigInt, RegExp, Error, Promise
+    console, Math, JSON, Array, Object, String, Number, BigInt, RegExp, Error, Promise, Set, Uint32Array, crypto: globalThis.crypto, ...extra
   };
   sandbox.window = sandbox; sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
@@ -231,14 +232,50 @@ test('typing.html runs, prepares a test, and survives having no localStorage', (
   assert.match(d.getElementById('bestTable').innerHTML, /No results yet/);
 });
 
+test('password-generator.html draws words from the EFF list and reports its real entropy', () => {
+  const s = boot('password-generator.html');
+  const run = src => vm.runInContext(src, s);
+  assert.ok(s.EffWords, 'eff-wordlist.js did not attach to the page');
+  assert.match(s.document.getElementById('entropyLabel').textContent, /^\d+ bits$/);
+
+  const known = new Set(s.EffWords.WORDS);
+  for (let i = 0; i < 200; i++)
+    for (const w of run("genPassphrase(6, ' ', false, false)").split(' ')) assert.ok(known.has(w), w);
+
+  const bits = run("entropyBits('x', 'passphrase', { words: 5 })");
+  assert.ok(Math.abs(bits - 5 * 5 * Math.log2(6)) < 1e-9, `5 words reported as ${bits} bits`);   // 7776 = 6^5
+  const withNumber = run("entropyBits('x', 'passphrase', { words: 5, addNumber: true })");
+  assert.ok(Math.abs(withNumber - bits - Math.log2(100)) < 1e-9);
+});
+
+test('password-generator.html picks with crypto.getRandomValues and without modulo bias', () => {
+  // 2^32 is not a multiple of 7776, so a plain remainder would favour the first
+  // words. Every draw past the last whole multiple has to be thrown away.
+  const limit = 2 ** 32 - (2 ** 32 % 7776);
+  assert.ok(limit < 2 ** 32 && limit % 7776 === 0);
+  let queue = null, calls = 0;
+  const s = boot('password-generator.html', { crypto: {
+    getRandomValues(buf) { calls++; buf[0] = queue && queue.length ? queue.shift() : 0; return buf; } },
+    Math: new Proxy(Math, { get: (m, k) => { assert.notEqual(k, 'random', 'Math.random was used'); return m[k]; } }) });
+  const draw = (...q) => { queue = q; calls = 0; return vm.runInContext('pick(WORDS)', s); };
+  const W = s.EffWords.WORDS;
+  assert.equal(draw(0), W[0]);
+  assert.equal(draw(7775), W[7775]);
+  assert.equal(draw(7776), W[0]);
+  assert.equal(draw(limit - 1), W[7775]);
+  assert.equal(calls, 1);
+  assert.equal(draw(limit, 2 ** 32 - 1, 42), W[42], 'a biased draw was kept');
+  assert.equal(calls, 3);
+});
+
 test('each page loads the script it uses, and uses the script it loads', () => {
   // A page that reaches for Bases without loading bases.js is a blank page in a
   // browser and a passing test everywhere else.
-  for (const page of ['baseconv.html', 'subnet.html', 'netcalc.html', 'techcalc.html', 'typing.html']) {
+  for (const page of ['baseconv.html', 'subnet.html', 'netcalc.html', 'techcalc.html', 'typing.html', 'password-generator.html']) {
     const html   = fs.readFileSync(path.join(pub, page), 'utf8');
     const loaded = [...html.matchAll(/<script src="\/scripts\/([\w.-]+)\.js/g)].map(m => m[1]);
     const body   = html.replace(/<script src[^>]*><\/script>/g, '');
-    for (const [file, name] of Object.entries({ bases: 'Bases', ipv4: 'IPv4', ipv6: 'IPv6', techcalc: 'TechCalc', typing: 'Typing' })) {
+    for (const [file, name] of Object.entries({ bases: 'Bases', ipv4: 'IPv4', ipv6: 'IPv6', techcalc: 'TechCalc', typing: 'Typing', 'eff-wordlist': 'EffWords' })) {
       const used = new RegExp(`\\b${name}\\.`).test(body);
       assert.equal(used, loaded.includes(file),
         `${page}: ${name} is ${used ? 'used' : 'unused'} but ${file}.js is ${loaded.includes(file) ? '' : 'not '}loaded`);
