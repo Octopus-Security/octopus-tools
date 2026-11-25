@@ -1,6 +1,7 @@
 {
   "name": "octopus-tools",
   "private": true,
+  "license": "MIT",
   "description": "Hand-maintained static tool pages, served by nginx. No build step; see tools/stamp-assets.mjs.",
   "scripts": {
     "stamp": "node tools/stamp-assets.mjs",

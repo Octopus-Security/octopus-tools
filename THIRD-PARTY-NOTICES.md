@@ -1,5 +1,7 @@
 # Third-party notices
 
+This project is MIT (see `LICENSE`). The material below keeps its own terms.
+
 | What | Where | Terms |
 |---|---|---|
 | pdf.js 3.11.174 (Mozilla) | `public/vendor/pdfjs-3.11.174/`, unmodified files from the npm package `pdfjs-dist` | Apache-2.0, full text in that folder |
