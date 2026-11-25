@@ -1,14 +1,19 @@
 FROM nginx:alpine
 RUN apk upgrade --no-cache
 COPY public/ /usr/share/nginx/html/
+# Icons, footer link and the pdf.js address: neutral as committed, replaced from
+# config/site.conf when that file exists. Runs before the build hash is taken.
+COPY config/ /tmp/config/
+COPY tools/apply-site-config.sh /tmp/apply-site-config.sh
+RUN sh /tmp/apply-site-config.sh /usr/share/nginx/html /tmp/config/site.conf \
+    && rm -rf /tmp/config /tmp/apply-site-config.sh
 # Replaces the stock default.conf — see nginx.conf for why the cache policy matters.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # ── Deploy verification ───────────────────────────────────────────────────────
 #
-# Portainer polls and reports back to nobody, so a deploy that never landed and
-# one that landed without helping look identical from outside. Every other
-# service in the estate answers that with /api/build; this one has no
+# A deploy that never landed and one that landed without helping look identical
+# from outside. /api/build tells them apart. There is no
 # application process to compute a stamp at startup, so it is computed HERE,
 # from the files actually in the image, and written out as a static document.
 #

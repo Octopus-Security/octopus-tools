@@ -4,8 +4,9 @@
 // PDF.js worker setup
 // ===========================
 if (typeof pdfjsLib !== 'undefined') {
+  // The worker sits beside pdf.min.js, wherever the page loaded that from.
   pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    document.querySelector('script[src*="/pdf.min.js"]').src.replace(/pdf\.min\.js.*$/, 'pdf.worker.min.js');
 }
 
 // ===========================
@@ -54,7 +55,8 @@ const tabPanels       = document.querySelectorAll('.tab-panel');
 // ===========================
 async function extractPdfText(file) {
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  // isEvalSupported: false is the published workaround for CVE-2024-4367 in this pdf.js.
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
   const pageTexts = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);

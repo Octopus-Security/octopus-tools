@@ -11,7 +11,7 @@
  * the upstream bytes, and `--check` fails if either the file or the pinned tag is
  * out of step (`--remote` also re-downloads the tag and compares).
  *
- *   node tools/kit-sync.mjs                 # download KIT_TAG from GitHub, rewrite the files
+ *   node tools/kit-sync.mjs                 # download KIT_TAG of KIT_REPO from GitHub, rewrite the files
  *   node tools/kit-sync.mjs --from <kitdir> # copy from a local kit checkout instead
  *   node tools/kit-sync.mjs --check         # offline: header hash matches the file, tag matches
  *   node tools/kit-sync.mjs --check --remote
@@ -34,12 +34,21 @@ const headerFor = (f, body) =>
   `/* vendored from octopus-kit ${KIT_TAG} ${f.src} | sha256:${sha(body)} | DO NOT EDIT: node tools/kit-sync.mjs */\n`;
 const HEADER_RE = /^\/\* vendored from octopus-kit (\S+) (\S+) \| sha256:([0-9a-f]{64}) \| DO NOT EDIT[^\n]*\*\/\n/;
 
+/** Where the kit is downloaded from: KIT_REPO in the environment, else in config/site.conf. */
+function kitRepo() {
+  if (process.env.KIT_REPO) return process.env.KIT_REPO;
+  const conf = join(ROOT, 'config/site.conf');
+  return existsSync(conf) ? (/^KIT_REPO=(.+)$/m.exec(readFileSync(conf, 'utf8')) || [])[1] : undefined;
+}
+
 function upstream(args) {
   const i = args.indexOf('--from');
   if (i >= 0) { const d = resolve(args[i + 1]); return f => readFileSync(join(d, f.src)); }
   const dir = mkdtempSync(join(tmpdir(), 'kit-'));
   const tgz = join(dir, 'kit.tgz');
-  execFileSync('curl', ['-fsSL', '-o', tgz, `https://codeload.github.com/Octopus-Security/octopus-kit/tar.gz/refs/tags/${KIT_TAG}`]);
+  const repo = kitRepo();
+  if (!repo) throw new Error('set KIT_REPO=<owner>/<repo> (environment or config/site.conf), or use --from <kitdir>');
+  execFileSync('curl', ['-fsSL', '-o', tgz, `https://codeload.github.com/${repo}/tar.gz/refs/tags/${KIT_TAG}`]);
   return f => execFileSync('tar', ['-xzOf', tgz, '--wildcards', `*/${f.src}`], { maxBuffer: 1 << 24 });
 }
 

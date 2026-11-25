@@ -2,7 +2,7 @@
 /**
  * pages.test.js — do the pages actually run?
  *
- * octopus-budget and octopus-shopper were both green — 22 and 102 tests — while
+ * Two sibling apps were both green — 22 and 102 tests — while
  * neither container could start, because every test imported the pieces and
  * none imported the entrypoint. One misplaced line threw at module load and the
  * suites had nothing to say about it.

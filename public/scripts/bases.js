@@ -11,7 +11,7 @@
  * HTML. A static `import './other.js'` inside a module resolves against the
  * importer's URL *without* its query string, so the imported file keeps coming
  * from Cloudflare's four-hour cache after a deploy — one stale sibling, looking
- * exactly like a deploy that never landed. octopus-ee hit precisely that and had
+ * exactly like a deploy that never landed. Another site hit precisely that and had
  * to version the whole directory to escape it. A plain script that assigns a
  * global and, under Node, module.exports has no import graph to go stale.
  *
